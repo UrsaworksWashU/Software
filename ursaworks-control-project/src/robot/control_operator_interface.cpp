@@ -75,7 +75,7 @@ float ControlOperatorInterface::getChassisXInput()
 
     const float maxChassisSpeed = chassis::MecanumChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     float finalX = maxChassisSpeed *
                    limitVal(chassisXInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -111,7 +111,7 @@ float ControlOperatorInterface::getChassisYInput()
 
     const float maxChassisSpeed = chassis::MecanumChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     float finalY = maxChassisSpeed *
                    limitVal(chassisYInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
@@ -147,7 +147,7 @@ float ControlOperatorInterface::getChassisRInput()
 
     const float maxChassisSpeed = chassis::MecanumChassisSubsystem::getMaxWheelSpeed(
         drivers->refSerial.getRefSerialReceivingData(),
-        drivers->refSerial.getRobotData().chassis.power);
+        drivers->refSerial.getRobotData().chassis.powerConsumptionLimit);
 
     float finalR = maxChassisSpeed *
                    limitVal(chassisRInput.getInterpolatedValue(currTime) + keyInput, -1.0f, 1.0f);
