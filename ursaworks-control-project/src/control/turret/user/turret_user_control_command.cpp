@@ -67,10 +67,78 @@ void TurretUserControlCommand::execute()
         userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
     pitchController->runController(dt, pitchSetpoint);
 
-    const float yawSetpoint =
-        yawController->getSetpoint() +
-        userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
-    yawController->runController(dt, yawSetpoint);
+    // Get current world frame yaw angle from turret imu
+    float currYaw = drivers->bmi088.getYaw();
+
+    bool spinOn = (drivers->remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) == tap::communication::serial::Remote::SwitchState::DOWN);
+
+    bool isMoving = drivers->remote.keyPressed(tap::communication::serial::Remote::Key::W) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::A) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::S) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::D);
+
+    // ======== 1st standard ========
+    // if (!spinOn)
+    // {
+    //     const float yawSetpoint =
+    //         yawController->getSetpoint() +
+    //         userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+    //         - (drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL) / 86.0f);
+
+
+    //     yawController->runController(dt, yawSetpoint);
+    // }
+    // else
+    // {
+    //     if (isMoving)
+    //     {
+    //         const float yawSetpoint =
+    //             yawController->getSetpoint() +
+    //             userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+    //             -(0.5f / 78.0f);
+
+    //         yawController->runController(dt, yawSetpoint);
+    //     }
+    //     else
+    //     {
+    //         const float yawSetpoint =
+    //             yawController->getSetpoint() +
+    //             userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+    //             -(0.5f / 73.0f);
+
+    //         yawController->runController(dt, yawSetpoint);
+    //     }
+    // }
+
+    // ======== 2nd standard ========
+    if (!spinOn)
+    {
+        const float yawSetpoint =
+            yawController->getSetpoint() +
+            userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+            - (drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL) / 86.0f);
+
+
+        yawController->runController(dt, yawSetpoint);
+    }
+    else
+    {
+        if (isMoving)
+        {
+            const float yawSetpoint =
+                yawController->getSetpoint() +
+                userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+                -(0.85f / 78.0f);
+
+            yawController->runController(dt, yawSetpoint);
+        }
+        else
+        {
+            const float yawSetpoint =
+                yawController->getSetpoint() +
+                userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+                -(0.85f / 73.0f);
+
+            yawController->runController(dt, yawSetpoint);
+        }
+    }
 }
 
 bool TurretUserControlCommand::isFinished() const

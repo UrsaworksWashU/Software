@@ -9,12 +9,19 @@ namespace xcysrc
 namespace chassis
 {
 static constexpr modm::Pair<int, float> CHASSIS_POWER_TO_MAX_SPEED_LUT[] = {
-    {50, 4'500},
-    {60, 5'700},
-    {70, 6'400},
-    {80, 6'700},
-    {100, 7'000},
-    {120, 8'000},
+    // {50, 4'500},
+    // {60, 5'700},
+    // {70, 6'400},
+    // {80, 6'700},
+    // {100, 7'000},
+    // {120, 8'000},
+    {50, 5'700},
+    {60, 6'400},
+    {70, 6'700},
+    {80, 7'000},
+    {100, 8'000},
+    {120, 9'000},
+
 };
 
 static modm::interpolation::Linear<modm::Pair<int, float>> CHASSIS_POWER_TO_SPEED_INTERPOLATOR(
@@ -45,10 +52,10 @@ public:
     void initialize() override;
     void setDesiredOutput(float x, float y, float r);
     inline int getNumChassisMotors() const override { return MODM_ARRAY_SIZE(motors); }
-    inline int16_t getLeftFrontRpmActual() const override { return leftFrontMotor.getShaftRPM(); }
-    inline int16_t getLeftBackRpmActual() const override { return leftBackMotor.getShaftRPM(); }
-    inline int16_t getRightFrontRpmActual() const override { return rightFrontMotor.getShaftRPM(); }
-    inline int16_t getRightBackRpmActual() const override { return rightBackMotor.getShaftRPM(); }
+    inline int16_t getLeftFrontRpmActual() const  { return leftFrontMotor.getShaftRPM(); }
+    inline int16_t getLeftBackRpmActual() const  { return leftBackMotor.getShaftRPM(); }
+    inline int16_t getRightFrontRpmActual() const  { return rightFrontMotor.getShaftRPM(); }
+    inline int16_t getRightBackRpmActual() const  { return rightBackMotor.getShaftRPM(); }
     enum WheelRPMIndex
     {
         LF = 0,

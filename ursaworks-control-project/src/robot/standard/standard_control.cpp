@@ -8,7 +8,8 @@
 #include "tap/drivers.hpp"
 #include "src/drivers_singleton.hpp"
 
-// #include "aruwsrc/control/agitator/velocity_agitator_subsystem.hpp"
+// #include "src/control/agitator/velocity_agitator_subsystem.hpp"
+// #include "src/control/a/example_subsystem.hpp"
 // #include "aruwsrc/control/chassis/beyblade_command.hpp"
 #include "src/control/chassis/chassis_autorotate_command.hpp"
 // #include "aruwsrc/control/client-display/client_display_command.hpp"
@@ -34,9 +35,12 @@ driversFunc drivers = DoNotUse_getDrivers;
 
 namespace standard_control
 {
-    static constexpr xcysrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
+
+// ========= 2nd standard ========
+
+static constexpr xcysrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 4778,
+    .startEncoderValue = 8750,
     .minAngle = 0,
     .maxAngle = M_PI,
     .limitMotorAngles = false,
@@ -44,17 +48,37 @@ namespace standard_control
 
 static constexpr xcysrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
     .startAngle = M_PI_2,
-    .startEncoderValue = 6300,
-    .minAngle = modm::toRadian(80),
-    .maxAngle = modm::toRadian(120),
+    .startEncoderValue = 11000,
+    .minAngle = modm::toRadian(60),
+    .maxAngle = modm::toRadian(100),
     .limitMotorAngles = true,
 };
+
+// ========= 1st standard ========
+
+// static constexpr xcysrc::control::turret::TurretMotorConfig YAW_MOTOR_CONFIG = {
+//     .startAngle = M_PI_2,
+//     .startEncoderValue = 4778,
+//     .minAngle = 0,
+//     .maxAngle = M_PI,
+//     .limitMotorAngles = false,
+// };
+
+// static constexpr xcysrc::control::turret::TurretMotorConfig PITCH_MOTOR_CONFIG = {
+//     .startAngle = M_PI_2,
+//     .startEncoderValue = 6300,
+//     .minAngle = modm::toRadian(60),
+//     .maxAngle = modm::toRadian(100),
+//     .limitMotorAngles = true,
+// };
+
+
 namespace chassis_rel
 {
 static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
-    .kp = 59'183.1f,
+    .kp = 75'183.1f,
     .ki = 0.0f,
-    .kd = 5000.2f,
+    .kd = 6500.0f,
     .maxICumulative = 0.0f,
     .maxOutput = 32'000.0f,
     .tQDerivativeKalman = 1.0f,
@@ -66,7 +90,7 @@ static constexpr tap::algorithms::SmoothPidConfig YAW_PID_CONFIG = {
 };
 
 static constexpr tap::algorithms::SmoothPidConfig PITCH_PID_CONFIG = {
-    .kp = 72'183.1f,
+    .kp = 72183.1f,
     .ki = 100.0f,
     .kd = 1000.0f,
     .maxICumulative = 10.0f,
@@ -100,6 +124,11 @@ xcysrc::control::turret::TurretSubsystem turret(
 xcysrc::chassis::MecanumChassisSubsystem chassis(drivers());
 
 // VelocityAgitatorSubsystem agitator(
+//     drivers(),
+//     constants::AGITATOR_PID_CONFIG,
+//     constants::AGITATOR_CONFIG);
+
+// ExampleSubsystem agitator(
 //     drivers(),
 //     constants::AGITATOR_PID_CONFIG,
 //     constants::AGITATOR_CONFIG);
@@ -140,10 +169,11 @@ xcysrc::control::turret::algorithms::ChassisFrameYawTurretController chassisFram
     turret.yawMotor,
     chassis_rel::YAW_PID_CONFIG);
 
-// algorithms::WorldFrameYawChassisImuTurretController worldFrameYawChassisImuController(
+// WorldFrameYawTurretImuCascadePidTurretController worldFrameYawChassisImuController(
 //     *drivers(),
 //     turret.yawMotor,
 //     world_rel_chassis_imu::YAW_PID_CONFIG);
+
 
 
 // turret commands
@@ -151,7 +181,7 @@ xcysrc::control::turret::user::TurretUserWorldRelativeCommand turretUserWorldRel
     drivers(),
     drivers()->controlOperatorInterface,
     &turret,
-    // &worldFrameYawChassisImuController,
+    //&worldFrameYawChassisImuController,
     &chassisFrameYawTurretController,
     &chassisFramePitchTurretController,
     0.02f,
@@ -161,7 +191,7 @@ xcysrc::control::turret::user::TurretUserWorldRelativeCommand turretUserWorldRel
 
 // rotates agitator when aiming at target and within heat limit
 
-// xcysrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
+//xcysrc::control::launcher::FrictionWheelSpinRefLimitedCommand spinFrictionWheels(
 //     drivers(),
 //     &frictionWheels,
 //     15.0f,
@@ -200,7 +230,7 @@ xcysrc::control::turret::user::TurretUserWorldRelativeCommand turretUserWorldRel
 PressCommandMapping xPressed(
     drivers(),
     {&chassisAutorotateCommand},
-    RemoteMapState({tap::Remote::Key::X}));
+    RemoteMapState({tap::communication::serial::Remote::Key::X}));
 
 /* register subsystems here -------------------------------------------------*/
 void registerStandardSubsystems(Drivers *drivers)

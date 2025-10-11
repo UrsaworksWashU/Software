@@ -58,6 +58,8 @@ void ChassisAutorotateCommand::updateAutorotateState()
 {
     float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
 
+    
+
     if (chassisAutorotating && chassisSymmetry != ChassisSymmetry::SYMMETRICAL_NONE &&
         !yawMotor->getConfig().limitMotorAngles &&
         turretYawActualSetpointDiff > (M_PI - TURRET_YAW_SETPOINT_MEAS_DIFF_TO_APPLY_AUTOROTATION))
@@ -92,9 +94,36 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = yawMotor->getAngleFromCenter();
 
-        if (abs(turretAngleFromCenter) < 5) {
-            turretAngleFromCenter = 0;
+        if (turretAngleFromCenter < 500) {
+            chassisAutorotating = false;
         }
+
+        bool spinOn = (drivers->remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) == tap::communication::serial::Remote::SwitchState::DOWN);
+
+        bool isMoving = drivers->remote.keyPressed(tap::communication::serial::Remote::Key::W) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::A) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::S) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::D);
+
+        if (!spinOn){
+            desiredRotationAverage = drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL) * 6000;
+        }
+        else{
+            if (isMoving){
+                // ======== 1st standard ========
+                // desiredRotationAverage = 0.5 * 6000;
+
+                // ======== 2nd standard ========
+                desiredRotationAverage = 0.5 * 6000;
+            }
+            else{
+                // ======== 1st standard ========
+                // desiredRotationAverage = 0.5 * 6000;
+
+                // ======== 2nd standard ========
+                desiredRotationAverage = 0.5 * 6000;
+            }
+            
+        }
+
+        
 
         if (chassisAutorotating)
         {

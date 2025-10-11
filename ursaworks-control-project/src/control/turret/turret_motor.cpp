@@ -26,7 +26,7 @@
 
 using namespace tap::motor;
 using namespace tap::algorithms;
-
+using namespace std;
 namespace xcysrc::control::turret
 {
 TurretMotor::TurretMotor(tap::motor::MotorInterface *motor, const TurretMotorConfig &motorConfig)
@@ -46,7 +46,7 @@ void TurretMotor::updateMotorAngle()
     if (isOnline())
     {
         int64_t encoderUnwrapped = motor->getEncoderUnwrapped();
-
+        cout << encoderUnwrapped << endl;
         if (startEncoderOffset == INT16_MIN)
         {
             int encoderDiff =

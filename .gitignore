@@ -1,5 +1,6 @@
 *.pyc
 
+Pipfile
 ursaworks-control-project/build
 ursaworks-control-project/Pipfile.lock
 project.xml.log

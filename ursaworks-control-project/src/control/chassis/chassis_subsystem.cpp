@@ -14,19 +14,19 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(tap::Drivers* drivers)
     : tap::control::chassis::ChassisSubsystemInterface(drivers),
       leftFrontMotor(
           drivers,
-          tap::motor::MOTOR2,
+          tap::motor::MOTOR1,
           tap::can::CanBus::CAN_BUS1,
           false,
           "left front drive motor"),
       leftBackMotor(
           drivers,
-          tap::motor::MOTOR3,
+          tap::motor::MOTOR2,
           tap::can::CanBus::CAN_BUS1,
           false,
           "left back drive motor"),
       rightFrontMotor(
           drivers,
-          tap::motor::MOTOR1,
+          tap::motor::MOTOR3,
           tap::can::CanBus::CAN_BUS1,
           false,
           "right front drive motor"),
@@ -76,38 +76,93 @@ void MecanumChassisSubsystem::initialize()
     }
 }
 
+
+// ======== 1st standard ========
+// void MecanumChassisSubsystem::calculateOutput(float x, float y, float r, float maxWheelSpeed)
+// {
+//     // this is the distance between the center of the chassis to the wheel
+//     float chassisRotationRatio = 1.0f;
+//     // sqrtf(powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
+
+//     // to take into account the location of the turret so we rotate around the turret rather
+//     // than the center of the chassis, we calculate the offset and than multiply however
+//     // much we want to rotate by
+//     float leftFrontRotationRatio =
+//         modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+//     float rightFrontRotationRatio =
+//         modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+//     float leftBackRotationRatio =
+//         modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+//     float rightBackRotationRatio =
+//         modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+//     float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
+//     desiredWheelRPM[LF] = limitVal(
+//         -y + x - chassisRotateTranslated * leftFrontRotationRatio,
+//         -maxWheelSpeed,
+//         maxWheelSpeed);
+//     desiredWheelRPM[RF] = limitVal(
+//         -y - x - chassisRotateTranslated * rightFrontRotationRatio,
+//         -maxWheelSpeed,
+//         maxWheelSpeed);
+//     desiredWheelRPM[LB] = limitVal(
+//         y + x - chassisRotateTranslated * leftBackRotationRatio,
+//         -maxWheelSpeed,
+//         maxWheelSpeed);
+//     desiredWheelRPM[RB] = limitVal(
+//         y - x - chassisRotateTranslated * rightBackRotationRatio,
+//         -maxWheelSpeed,
+//         maxWheelSpeed);
+
+//     desiredRotation = r;
+// }
+
+// // ======== 2nd standard ========
 void MecanumChassisSubsystem::calculateOutput(float x, float y, float r, float maxWheelSpeed)
 {
     // this is the distance between the center of the chassis to the wheel
-    float chassisRotationRatio = sqrtf(
-        powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
+    float chassisRotationRatio = 1.0f;
+    // sqrtf(powf(WIDTH_BETWEEN_WHEELS_X / 2.0f, 2.0f) + powf(WIDTH_BETWEEN_WHEELS_Y / 2.0f, 2.0f));
 
     // to take into account the location of the turret so we rotate around the turret rather
     // than the center of the chassis, we calculate the offset and than multiply however
     // much we want to rotate by
-    float leftFrontRotationRatio =
-        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-    float rightFrontRotationRatio =
-        modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-    float leftBackRotationRatio =
-        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
-    float rightBackRotationRatio =
-        modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
-    float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
+    // float leftFrontRotationRatio =
+    //     modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    // float rightFrontRotationRatio =
+    //     modm::toRadian(chassisRotationRatio - GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    // float leftBackRotationRatio =
+    //     modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET - GIMBAL_Y_OFFSET);
+    // float rightBackRotationRatio =
+    //     modm::toRadian(chassisRotationRatio + GIMBAL_X_OFFSET + GIMBAL_Y_OFFSET);
+    // float chassisRotateTranslated = modm::toDegree(r) / chassisRotationRatio;
+
+        // calculate the desired output for each wheel
+    // desiredOutput[static_cast<uint8_t>(MotorId::LF)] = mpsToRpm(x + y - rotation);
+    // desiredOutput[static_cast<uint8_t>(MotorId::LB)] = mpsToRpm(x - y - rotation);
+    // desiredOutput[static_cast<uint8_t>(MotorId::RB)] = mpsToRpm(x - y + rotation);
+    // desiredOutput[static_cast<uint8_t>(MotorId::RF)] = mpsToRpm(x + y + rotation);
+
+
     desiredWheelRPM[LF] = limitVal(
-        -y + x - chassisRotateTranslated * leftFrontRotationRatio,
+        +x -y - r,
         -maxWheelSpeed,
         maxWheelSpeed);
+
+
     desiredWheelRPM[RF] = limitVal(
-        -y - x - chassisRotateTranslated * rightFrontRotationRatio,
+        -x -y - r,
         -maxWheelSpeed,
         maxWheelSpeed);
+
+
     desiredWheelRPM[LB] = limitVal(
-        y + x - chassisRotateTranslated * leftBackRotationRatio,
+        +x +y - r,
         -maxWheelSpeed,
         maxWheelSpeed);
+
+
     desiredWheelRPM[RB] = limitVal(
-        y - x - chassisRotateTranslated * rightBackRotationRatio,
+        -x +y - r,
         -maxWheelSpeed,
         maxWheelSpeed);
 
@@ -183,6 +238,7 @@ float MecanumChassisSubsystem::chassisSpeedRotationPID(float currentAngleError, 
 
     return wheelRotationSpeed;
 }
+
 
 }  // namespace chassis
 }  // namespace xcysrc
