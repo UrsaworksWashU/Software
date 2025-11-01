@@ -235,7 +235,7 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
 bool ControlOperatorInterface::isAutoAimSwitchActive()
 {
     return drivers->remote.getSwitch(
-               tap::communication::serial::Remote::Switch::LEFT_SWITCH) ==
+               tap::communication::serial::Remote::Switch::RIGHT_SWITCH) ==
            tap::communication::serial::Remote::SwitchState::UP;
 }
 

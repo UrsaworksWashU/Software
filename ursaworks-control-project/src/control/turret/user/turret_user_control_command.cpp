@@ -24,7 +24,7 @@
 #include "../turret_subsystem.hpp"
 #include "src/robot/control_operator_interface.hpp"
 
-#include "src/main.cpp" // for readUartData
+#include "src/control/vision.hpp" // for readUartData
 
 namespace xcysrc::control::turret::user
 {
@@ -70,32 +70,9 @@ void TurretUserControlCommand::execute()
     // Check if auto-aim is active and user is not aiming manually
     if (controlOperatorInterface.isAutoAimSwitchActive() && !controlOperatorInterface.isUserAiming(turretID))
     {
-        std::vector<uint8_t> messageBuffer;
-        messageBuffer.reserve(MESSAGE_LENGTH);
-        bool messageReceived = readUartData(messageBuffer);
-        if (messageReceived)
-        {
-            std::string message(reinterpret_cast<const char*>(messageBuffer.data()), messageBuffer.size());
-            size_t y_pos = message.find('Y');
-            if (message[0] == 'P' && y_pos != std::string::npos) {
-                std::string pitch_str = message.substr(1, y_pos - 1);
-                std::string yaw_str = message.substr(y_pos + 1);
-                pitchInput = std::stof(pitch_str);
-                yawInput = std::stof(yaw_str);
-            }
-            else
-            {
-                // Invalid message format, default to zero input
-                pitchInput = 0.0f;
-                yawInput = 0.0f;
-            }
-        }
-        else
-        {
-            // No valid message received, default to zero input
-            pitchInput = 0.0f;
-            yawInput = 0.0f;
-        }
+        std::vector<float> visionInputs = ::control::vision::getVisionPitchYaw();
+        pitchInput = visionInputs[0];
+        yawInput = visionInputs[1];
     }
     // Otherwise, use manual user input
     else

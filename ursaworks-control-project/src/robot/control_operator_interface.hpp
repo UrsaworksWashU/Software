@@ -102,7 +102,7 @@ public:
     static constexpr float USER_AIM_DEADBAND = 0.05f; // Deadband for joystick/mouse aiming
 
     /**
-     * @returns true if the remote switch for auto-aim is active.
+     * @returns true if the remote switch for auto-aim is active. Currently configured as RIGHT_SWITCH UP
      */
     mockable bool isAutoAimSwitchActive();
 
