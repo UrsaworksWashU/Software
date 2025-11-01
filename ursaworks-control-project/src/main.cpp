@@ -47,6 +47,10 @@
 
 #include "taproot/src/tap/communication/serial/remote.hpp"
 
+#include "tap/communication/serial/uart.hpp"
+using namespace::modm::literals;
+
+
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
@@ -130,7 +134,6 @@ static void spin(tap::Drivers *drivers)
 }
 
 
-
 static void agitatorSpin(tap::Drivers *drivers)
 {
     /*tap::motor::DjiMotor agitatorMotor(::DoNotUse_getDrivers(), agitatorID, CAN_BUS,false,"cool motor"); */
@@ -163,6 +166,113 @@ static void IMUData(tap::Drivers *drivers)
 }
 
 
+
+constexpr modm::baudrate_t BAUDRATE = 115.2_kBd;
+tap::communication::serial::Uart uart;
+const size_t MESSAGE_LENGTH = 4; // Define according to your protocol
+int messageIndex = 0;
+
+// Define your message protocol
+const uint8_t START_BYTE = 0xAA;
+const uint8_t END_BYTE = 0xBB;
+
+// States for our receiver
+enum class ReceiverState
+{
+    WAITING_FOR_START,
+    RECEIVING_MESSAGE
+};
+
+// Below is a simple UART message receiver implementation
+// --- Global variables to manage state ---
+ReceiverState currentState = ReceiverState::WAITING_FOR_START;
+
+bool readUartData(std::vector<uint8_t> &messageBuffer)
+{
+    uint8_t incomingByte;
+    messageBuffer.clear();
+
+    // Process all available bytes in the UART buffer
+    while (uart.read(tap::communication::serial::Uart::UartPort::Uart1, &incomingByte))
+    {
+        switch (currentState)
+        {
+            case ReceiverState::WAITING_FOR_START:
+                if (incomingByte == START_BYTE)
+                {
+                    currentState = ReceiverState::RECEIVING_MESSAGE;
+                }
+                // Ignore any other bytes
+                break;
+
+            case ReceiverState::RECEIVING_MESSAGE:
+                if (incomingByte == END_BYTE)
+                {
+                    // Reset to wait for the next message
+                    currentState = ReceiverState::WAITING_FOR_START;
+                    messageIndex = 0;
+
+                    // Complete message received
+                    if (messageIndex == MESSAGE_LENGTH - 1)
+                    {
+                        return true;
+                    }
+                    // Incomplete message, discard
+                    else
+                    {
+                        messageBuffer.clear();
+                        return false;
+                    }
+                    
+
+                }
+                else
+                {
+                    // Add the byte to our buffer, with a check for overflow
+                    if (messageIndex < MESSAGE_LENGTH)
+                    {
+                        messageBuffer[messageIndex++] = incomingByte;
+                    }
+                    else
+                    {
+                        // Buffer overflow! Discard the message and reset.
+                        currentState = ReceiverState::WAITING_FOR_START;
+                        messageIndex = 0;
+                        messageBuffer.clear();
+                        return false;
+                    }
+                }
+                break;
+        }
+    }
+
+    // if we are here, then there is nothing over UART to read
+    return false;
+}
+
+
+bool sendAcknowledgment(tap::communication::serial::Uart &uart, tap::Drivers *drivers)
+{
+    tap::communication::serial::RefSerialData::RobotId myId = drivers->refSerial.getRobotData().robotId;
+    std::string teamColor;
+    if (tap::communication::serial::RefSerialData::isBlueTeam(myId))
+    {
+        teamColor = "BLUE";
+    }
+    else
+    {
+        teamColor = "RED";
+    }
+    
+    return uart.write(
+    tap::communication::serial::Uart::UartPort::Uart1,
+    (const uint8_t*)teamColor.c_str(), // Cast the pointer to const uint8_t*
+    teamColor.length()                  // Send the exact length of the string
+    );
+}
+
+
+
 int main()
 {
     /*
@@ -183,6 +293,10 @@ int main()
     drivers->leds.set(tap::gpio::Leds::Green, false);   
     agimotor.initialize();
     initializePWM(drivers); 
+
+    uart.init<tap::communication::serial::Uart::UartPort::Uart1, BAUDRATE>();
+    sendAcknowledgment(uart, drivers); // send acknowledgement to jetson on startup
+
     while (1)
     {
         // do this as fast as you can

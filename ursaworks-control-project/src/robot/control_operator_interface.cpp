@@ -230,6 +230,31 @@ float ControlOperatorInterface::getTurretPitchInput(uint8_t turretID)
     }
 }
 
+
+// sebsequent code is for barebones vision integration
+bool ControlOperatorInterface::isAutoAimSwitchActive()
+{
+    return drivers->remote.getSwitch(
+               tap::communication::serial::Remote::Switch::LEFT_SWITCH) ==
+           tap::communication::serial::Remote::SwitchState::UP;
+}
+
+bool ControlOperatorInterface::isUserAiming(uint8_t turretID)
+{
+    // Check main aiming inputs 
+    if (fabs(getTurretPitchInput(turretID)) > USER_AIM_DEADBAND)
+    {
+        return true;
+    }
+    if (fabs(getTurretYawInput(turretID)) > USER_AIM_DEADBAND)
+    {
+        return true;
+    }
+
+    // If we are here, the user is not providing manual input
+    return false;
+}
+
 }  // namespace control
 
 }  // namespace xcysrc

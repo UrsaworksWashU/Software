@@ -24,6 +24,8 @@
 #include "../turret_subsystem.hpp"
 #include "src/robot/control_operator_interface.hpp"
 
+#include "src/main.cpp" // for readUartData
+
 namespace xcysrc::control::turret::user
 {
 TurretUserControlCommand::TurretUserControlCommand(
@@ -62,9 +64,49 @@ void TurretUserControlCommand::execute()
     uint32_t dt = currTime - prevTime;
     prevTime = currTime;
 
+    float pitchInput;
+    float yawInput;
+
+    // Check if auto-aim is active and user is not aiming manually
+    if (controlOperatorInterface.isAutoAimSwitchActive() && !controlOperatorInterface.isUserAiming(turretID))
+    {
+        std::vector<uint8_t> messageBuffer;
+        messageBuffer.reserve(MESSAGE_LENGTH);
+        bool messageReceived = readUartData(messageBuffer);
+        if (messageReceived)
+        {
+            std::string message(reinterpret_cast<const char*>(messageBuffer.data()), messageBuffer.size());
+            size_t y_pos = message.find('Y');
+            if (message[0] == 'P' && y_pos != std::string::npos) {
+                std::string pitch_str = message.substr(1, y_pos - 1);
+                std::string yaw_str = message.substr(y_pos + 1);
+                pitchInput = std::stof(pitch_str);
+                yawInput = std::stof(yaw_str);
+            }
+            else
+            {
+                // Invalid message format, default to zero input
+                pitchInput = 0.0f;
+                yawInput = 0.0f;
+            }
+        }
+        else
+        {
+            // No valid message received, default to zero input
+            pitchInput = 0.0f;
+            yawInput = 0.0f;
+        }
+    }
+    // Otherwise, use manual user input
+    else
+    {
+        pitchInput = userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
+        yawInput = userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID);
+    }
+
     const float pitchSetpoint =
         pitchController->getSetpoint() +
-        userPitchInputScalar * controlOperatorInterface.getTurretPitchInput(turretID);
+        pitchInput;
     pitchController->runController(dt, pitchSetpoint);
 
     // Get current world frame yaw angle from turret imu
@@ -112,7 +154,7 @@ void TurretUserControlCommand::execute()
     {
         const float yawSetpoint =
             yawController->getSetpoint() +
-            userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+            yawInput
             - (drivers->remote.getChannel(tap::communication::serial::Remote::Channel::WHEEL) / 86.0f);
 
 
@@ -124,7 +166,7 @@ void TurretUserControlCommand::execute()
         {
             const float yawSetpoint =
                 yawController->getSetpoint() +
-                userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+                yawInput
                 -(0.85f / 78.0f);
 
             yawController->runController(dt, yawSetpoint);
@@ -133,7 +175,7 @@ void TurretUserControlCommand::execute()
         {
             const float yawSetpoint =
                 yawController->getSetpoint() +
-                userYawInputScalar * controlOperatorInterface.getTurretYawInput(turretID)
+                yawInput
                 -(0.85f / 73.0f);
 
             yawController->runController(dt, yawSetpoint);
@@ -151,5 +193,6 @@ void TurretUserControlCommand::end(bool)
     turretSubsystem->yawMotor.setMotorOutput(0);
     turretSubsystem->pitchMotor.setMotorOutput(0);
 }
+
 
 }  // namespace xcysrc::control::turret::user
