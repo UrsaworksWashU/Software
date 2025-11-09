@@ -15,3 +15,4 @@ gcov-result
 docs/_build
 docs/api
 docs/doxyoutput
+Software.code-workspace
