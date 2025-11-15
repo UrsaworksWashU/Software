@@ -85,10 +85,8 @@ float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
     float turretAngleFromCenter,
     float maxAngleFromCenter)
 {
-    // Use limitVal instead of WrappedFloat to clamp the angle instead of wrapping it
-    // This prevents the angle from suddenly flipping when it exceeds maxAngleFromCenter
-    // Original code used ContiguousFloat which clamps values, not wraps them
-    return limitVal(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter);
+    return WrappedFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+        .getWrappedValue();
 }
 
 void ChassisAutorotateCommand::execute()
@@ -101,16 +99,16 @@ void ChassisAutorotateCommand::execute()
 
         float turretAngleFromCenter = yawMotor->getAngleFromCenter();
 
+        if (turretAngleFromCenter < 500) {
+            chassisAutorotating = false;
+        }
+
         // Original code had: if (turretAngleFromCenter < 500) { chassisAutorotating = false; }
         // This condition was always true (since angle is in radians, range -π to π, so < 500 is always true)
         // So it always disabled autorotation. We replace it with checking spinOn state.
         // Disable autorotation when spinOn is false (prevents autorotation from starting automatically on boot)
         bool spinOn = (drivers->remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) == tap::communication::serial::Remote::SwitchState::DOWN);
-        if (!spinOn)
-        {
-            chassisAutorotating = false;
-        }
-
+        
         bool isMoving = drivers->remote.keyPressed(tap::communication::serial::Remote::Key::W) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::A) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::S) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::D);
 
         if (!spinOn){
