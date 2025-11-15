@@ -3,6 +3,7 @@
 #include "modm/math/interpolation/linear.hpp"
 #include "tap/control/chassis/chassis_subsystem_interface.hpp"
 #include "tap/drivers.hpp"
+#include "tap/motor/dji_motor.hpp"
 
 namespace xcysrc
 {
@@ -98,6 +99,10 @@ public:
         desiredWheelRPM[2] = 0;
         desiredWheelRPM[3] = 0;
     }
+
+    bool allMotorsOnline() const override;
+
+    modm::Matrix<float, 3, 1> getActualVelocityChassisRelative() const override;
 
 private:
     void calculateOutput(float x, float y, float r, float maxWheelSpeed);

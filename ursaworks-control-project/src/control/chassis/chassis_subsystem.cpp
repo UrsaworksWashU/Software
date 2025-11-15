@@ -1,5 +1,6 @@
 #include "src/control/chassis/chassis_subsystem.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/motor/dji_motor.hpp"
 using namespace tap::algorithms;
 
 namespace xcysrc
@@ -66,6 +67,23 @@ MecanumChassisSubsystem::MecanumChassisSubsystem(tap::Drivers* drivers)
     motors[RF] = &rightFrontMotor;
     motors[LB] = &leftBackMotor;
     motors[RB] = &rightBackMotor;
+}
+
+bool MecanumChassisSubsystem::allMotorsOnline() const
+{
+    return leftFrontMotor.isMotorOnline() &&
+           leftBackMotor.isMotorOnline() &&
+           rightFrontMotor.isMotorOnline() &&
+           rightBackMotor.isMotorOnline();
+}
+
+modm::Matrix<float, 3, 1> MecanumChassisSubsystem::getActualVelocityChassisRelative() const
+{
+    modm::Matrix<float, 3, 1> result;
+    result[0][0] = 0.0f;
+    result[1][0] = 0.0f;
+    result[2][0] = 0.0f;
+    return result;
 }
 
 void MecanumChassisSubsystem::initialize()

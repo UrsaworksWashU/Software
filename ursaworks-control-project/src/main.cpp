@@ -47,6 +47,8 @@
 
 #include "taproot/src/tap/communication/serial/remote.hpp"
 
+#include "tap/motor/dji_motor.hpp"
+
 static constexpr float MAIN_LOOP_FREQUENCY = 500.0f;
 static constexpr float MAHONY_KP = 0.1f;
 
@@ -145,7 +147,7 @@ static void agitatorSpin(tap::Drivers *drivers)
     else{
         agimotor.setDesiredOutput(static_cast<int32_t>(0));  
     }
-    drivers->djiMotorTxHandler.processCanSendData();
+    drivers->djiMotorTxHandler.encodeAndSendCanData();
 }
 
 static void rotate(tap::Drivers *drivers) {
@@ -153,7 +155,7 @@ static void rotate(tap::Drivers *drivers) {
     drivers->leds.set(tap::gpio::Leds::Blue, wheelInput > 0.8F);
     drivers->leds.set(tap::gpio::Leds::Red, wheelInput < -0.8F);
     l1.setDesiredOutput(static_cast<int16_t>(5000));
-    drivers->djiMotorTxHandler.processCanSendData();
+    drivers->djiMotorTxHandler.encodeAndSendCanData();
 }
 
 
@@ -191,7 +193,7 @@ int main()
         {
             PROFILE(drivers->profiler, drivers->bmi088.periodicIMUUpdate, ());
             PROFILE(drivers->profiler, drivers->commandScheduler.run, ());
-            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.processCanSendData, ());
+            PROFILE(drivers->profiler, drivers->djiMotorTxHandler.encodeAndSendCanData, ());
             PROFILE(drivers->profiler, drivers->terminalSerial.update, ());
 
 

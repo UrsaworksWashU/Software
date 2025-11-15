@@ -19,9 +19,14 @@
 
 #include "chassis_autorotate_command.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 #include "tap/algorithms/math_user_utils.hpp"
+#include "tap/algorithms/wrapped_float.hpp"
 #include "tap/communication/serial/remote.hpp"
 #include "tap/drivers.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 #include "src/control/turret/turret_subsystem.hpp"
 
@@ -56,7 +61,7 @@ void ChassisAutorotateCommand::initialize()
 
 void ChassisAutorotateCommand::updateAutorotateState()
 {
-    float turretYawActualSetpointDiff = abs(yawMotor->getValidChassisMeasurementError());
+    float turretYawActualSetpointDiff = std::abs(yawMotor->getValidChassisMeasurementError());
 
     
 
@@ -80,8 +85,8 @@ float ChassisAutorotateCommand::computeAngleFromCenterForAutorotation(
     float turretAngleFromCenter,
     float maxAngleFromCenter)
 {
-    return ContiguousFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
-        .getValue();
+    return WrappedFloat(turretAngleFromCenter, -maxAngleFromCenter, maxAngleFromCenter)
+        .getWrappedValue();
 }
 
 void ChassisAutorotateCommand::execute()
@@ -98,8 +103,12 @@ void ChassisAutorotateCommand::execute()
             chassisAutorotating = false;
         }
 
+        // Original code had: if (turretAngleFromCenter < 500) { chassisAutorotating = false; }
+        // This condition was always true (since angle is in radians, range -π to π, so < 500 is always true)
+        // So it always disabled autorotation. We replace it with checking spinOn state.
+        // Disable autorotation when spinOn is false (prevents autorotation from starting automatically on boot)
         bool spinOn = (drivers->remote.getSwitch(tap::communication::serial::Remote::Switch::RIGHT_SWITCH) == tap::communication::serial::Remote::SwitchState::DOWN);
-
+        
         bool isMoving = drivers->remote.keyPressed(tap::communication::serial::Remote::Key::W) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::A) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::S) || drivers->remote.keyPressed(tap::communication::serial::Remote::Key::D);
 
         if (!spinOn){
@@ -157,7 +166,7 @@ void ChassisAutorotateCommand::execute()
             // pass filter alpha is small and more averaging will be applied to the desired
             // autorotation
             float autorotateSmoothingAlpha = std::max(
-                1.0f - abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
+                1.0f - std::abs(angleFromCenterForChassisAutorotate) / maxAngleFromCenter,
                 AUTOROTATION_MIN_SMOOTHING_ALPHA);
 
             // low pass filter the desiredRotation to avoid radical changes in the desired
