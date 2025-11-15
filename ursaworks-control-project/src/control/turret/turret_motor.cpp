@@ -20,9 +20,12 @@
 #include "turret_motor.hpp"
 
 #include <cassert>
+#include <cmath>
 
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
+#include "tap/motor/dji_motor_encoder.hpp"
+#include "modm/math/geometry/angle.hpp"
 
 using namespace tap::motor;
 using namespace tap::algorithms;
@@ -45,8 +48,10 @@ void TurretMotor::updateMotorAngle()
 {
     if (isOnline())
     {
-        int64_t encoderUnwrapped = motor->getPositionUnwrapped();
-        cout << encoderUnwrapped << endl;
+        tap::motor::DjiMotor* djiMotor = static_cast<tap::motor::DjiMotor*>(motor);
+        int64_t encoderUnwrapped = static_cast<int64_t>(
+            djiMotor->getInternalEncoder().getEncoder().getUnwrappedValue());
+        
         if (startEncoderOffset == INT16_MIN)
         {
             int encoderDiff =
