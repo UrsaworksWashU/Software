@@ -23,8 +23,8 @@
 #include "tap/control/command.hpp"
 #include "tap/drivers.hpp"
 
-#include "src/robot/control_operator_interface.hpp"
-#include "src/control/turret/turret_motor.hpp"
+#include "../../robot/control_operator_interface.hpp"
+#include "../turret/turret_motor.hpp"
 
 namespace xcysrc::chassis
 {

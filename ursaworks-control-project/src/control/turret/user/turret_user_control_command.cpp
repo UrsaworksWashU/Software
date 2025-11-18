@@ -22,7 +22,7 @@
 #include "tap/drivers.hpp"
 
 #include "../turret_subsystem.hpp"
-#include "src/robot/control_operator_interface.hpp"
+#include "robot/control_operator_interface.hpp"
 
 namespace xcysrc::control::turret::user
 {

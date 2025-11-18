@@ -1,4 +1,4 @@
-#include "src/control/chassis/chassis_subsystem.hpp"
+#include "control/chassis/chassis_subsystem.hpp"
 #include "tap/algorithms/math_user_utils.hpp"
 #include "tap/motor/dji_motor.hpp"
 using namespace tap::algorithms;

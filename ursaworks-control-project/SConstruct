@@ -68,6 +68,7 @@ env["CONFIG_PROFILE"] = args["BUILD_PROFILE"]
 env.AppendUnique(CPPPATH=[
     abspath(r"src"),
     abspath(r"test"),
+    abspath(r"taproot"),
 ])
 
 

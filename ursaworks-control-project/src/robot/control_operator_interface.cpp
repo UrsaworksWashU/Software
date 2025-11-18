@@ -7,7 +7,7 @@
 #include "tap/architecture/clock.hpp"
 #include "tap/drivers.hpp"
 
-#include "src/control/chassis/chassis_subsystem.hpp"
+#include "control/chassis/chassis_subsystem.hpp"
 
 using namespace tap;
 using namespace tap::algorithms;
