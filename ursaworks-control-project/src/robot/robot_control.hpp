@@ -20,7 +20,7 @@
 #ifndef ROBOT_CONTROL_HPP_
 #define ROBOT_CONTROL_HPP_
 
-#include "src/robot/standard/standard_drivers.hpp"
+#include "robot/standard/standard_drivers.hpp"
 
 namespace xcysrc::standard
 {

@@ -6,17 +6,17 @@
 #include "tap/control/setpoint/commands/calibrate_command.hpp"
 #include "tap/control/toggle_command_mapping.hpp"
 #include "tap/drivers.hpp"
-#include "src/drivers_singleton.hpp"
+#include "drivers_singleton.hpp"
 
 // #include "src/control/agitator/velocity_agitator_subsystem.hpp"
 // #include "src/control/a/example_subsystem.hpp"
 // #include "aruwsrc/control/chassis/beyblade_command.hpp"
-#include "src/control/chassis/chassis_autorotate_command.hpp"
+#include "control/chassis/chassis_autorotate_command.hpp"
 // #include "aruwsrc/control/client-display/client_display_command.hpp"
 // #include "aruwsrc/control/client-display/client_display_subsystem.hpp"
-#include "src/control/turret/algorithms/chassis_frame_turret_controller.hpp"
-#include "src/control/turret/user/turret_user_world_relative_command.hpp"
-#include "src/control/chassis/chassis_subsystem.hpp"
+#include "control/turret/algorithms/chassis_frame_turret_controller.hpp"
+#include "control/turret/user/turret_user_world_relative_command.hpp"
+#include "control/chassis/chassis_subsystem.hpp"
 
 using namespace tap::control::setpoint;
 using namespace xcysrc::standard;

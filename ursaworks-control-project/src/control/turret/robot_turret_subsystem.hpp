@@ -20,8 +20,8 @@
 #ifndef ROBOT_TURRET_SUBSYSTEM_HPP_
 #define ROBOT_TURRET_SUBSYSTEM_HPP_
 
-#include "src/control/turret/turret_orientation_interface.hpp"
-#include "src/control/turret/turret_subsystem.hpp"
+#include "control/turret/turret_orientation_interface.hpp"
+#include "control/turret/turret_subsystem.hpp"
 
 namespace xcysrc::control::turret
 {

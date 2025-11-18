@@ -17,7 +17,7 @@
  * along with aruw-mcb.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "chassis_autorotate_command.hpp"
+
 
 #include <algorithm>
 #include <cmath>
@@ -28,8 +28,8 @@
 #include "tap/drivers.hpp"
 #include "modm/math/geometry/angle.hpp"
 
-#include "src/control/turret/turret_subsystem.hpp"
-
+#include "control/turret/turret_subsystem.hpp"
+#include "chassis_autorotate_command.hpp"
 #include "chassis_rel_drive.hpp"
 #include "chassis_subsystem.hpp"
 

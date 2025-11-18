@@ -29,7 +29,7 @@
 #include "tap/architecture/profiler.hpp"
 
 /* communication includes ---------------------------------------------------*/
-#include "src/drivers_singleton.hpp"
+#include "drivers_singleton.hpp"
 
 /* error handling includes --------------------------------------------------*/
 #include "tap/errors/create_errors.hpp"
@@ -37,15 +37,15 @@
 /* control includes ---------------------------------------------------------*/
 #include "tap/architecture/clock.hpp"
 
-#include "src/robot/robot_control.hpp"
+#include "robot/robot_control.hpp"
 
 #include "tap/communication/gpio/pwm.hpp"
 
-#include "taproot/src/tap/algorithms/smooth_pid.hpp"
+#include "tap/algorithms/smooth_pid.hpp"
 
-#include "taproot/src/tap/communication/serial/remote_serial_constants.hpp"
+#include "tap/communication/serial/remote_serial_constants.hpp"
 
-#include "taproot/src/tap/communication/serial/remote.hpp"
+#include "tap/communication/serial/remote.hpp"
 
 #include "tap/motor/dji_motor.hpp"
 
